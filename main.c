@@ -1,140 +1,97 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
+#include <math.h>
 
-void celTo(float tmp); /*Celsius converter*/
-void farTo(float tmp); /*Fahrenheit converter*/
-void kelTo(float tmp); /*Kelvin converter*/
-void universal(float tmp); /*Undefined converter*/
-void error(char type, char tp2); /*Error handling*/
+#define Treshold 100
+
+int isempty();
+int isfull();
+double peek();
+double pop();
+void push(double data);
+
+double stack[Treshold];
+int top=-1;
 
 int main(int argc, char *argv[])
 {
-    int capScale, status;
-    float val, temp;
+    int i;
+    double res=0.0f, valm=0.0f, val=0.0f;
 
-    status = 1;
-    val = atof(argv[1]); /*converting pointer to float*/
+    if (argc==1)
+        printf("Error: This program inputs data via command line arguments.\nUse:\n+ to add\n- to substract\n'*' to muliply\n/ to devide\n");
 
-    if(argc==2)
+
+    for(i=2; i<=argc; i++) /*Main calc loop*/
     {
-        universal(val);
-    }
-    else if (argc==3)
-    {
-        temp = *argv[2];
-        capScale = toupper(temp); /*letter capitalization*/
-        switch(capScale) /*Scale scenario switching*/
+        switch(*argv[i-1]) /*Arithmetic operations*/
         {
-            case 'C': /*In case of Celsius*/
-                {
-                    if (val > -273.16)
-                        celTo(val);
-                    else
-                    {
-                        error('b', '\0');
-                        status=0;
-                    }
-                }
+            case '+': {val=pop(); valm=pop(); res=valm+val; push(res);}/*Addiction*/
             break;
-            case 'F': /*In case of Fahrenheit*/
-                {
-                    if (val > -459.67)
-                        farTo(val);
-                    else
-                    {
-                        error('b', '\0');
-                        status=0;
-                    }
-                }
+            case '-': {val=pop(); valm=pop(); res=valm-val; push(res);}/*Subtraction*/
             break;
-            case 'K': /*In case of Kelvin*/
-                {
-                    if (val > -0.01)
-                        kelTo(val);
-                    else
-                    {
-                        error('b', '\0');
-                        status=0;
-                    }
-                }
+            case 'x': {val=pop(); valm=pop(); res=valm*val; push(res);}/*Multiplication*/
             break;
-            default:
-                {
-                     error('a', capScale);
-                     status=0;
-                }
+            case '/': {
+                        val=pop(); valm=pop();
+                        if (val!=0)
+                        {
+                            res=valm/val;
+                            push(res); /*Division*/
+                        } else
+                            {
+                            printf("Indeterminate form");/*Division error checking*/
+                            exit(1);
+                            }
+                        }
+            break;
+            default: {push(atof(argv[i-1]));}
         }
-    }
-    return status; /*Main output*/
+    } /*End*/
+
+    printf("Result: %.2f\n", res); /*Result printing*/
+    return 0;
 }
-void celTo(float tmp) /*Celsius conversion*/
-    {
-        float celsius, fahrenheit, kelvin;
 
-        celsius = tmp;
-        fahrenheit = 9*celsius/5+32;
-        kelvin = celsius + 273.15;
-        printf("%.2f F\n%.2f K ;-)\n", fahrenheit, kelvin);
-    }
-void farTo(float tmp) /*Fahrenheit conversion*/
-    {
-        float celsius, fahrenheit, kelvin;
+int isempty() /*Checking stack status*/
+{
+    if (top==-1)
+        return 1;
+    else
+        return 0;
+}
+int isfull() /*Checking stack status*/
+{
+    if (top==Treshold)
+        return 1;
+    else
+        return 0;
+}
+double peek() /*Stack top element value*/
+{
+   return stack[top];
+}
+double pop() /*Stack output*/
+{
+    double data;
 
-        fahrenheit = tmp;
-        celsius = (fahrenheit - 32)*5/9;
-        kelvin = celsius + 273.15;
-        printf("%.2f C\n%.2f K ;-)\n", celsius, kelvin);
-    }
-void kelTo(float tmp) /*Kelvin conversion*/
+    if(!isempty())
     {
-        float celsius, fahrenheit, kelvin;
+        data = stack[top];
+        --top;
 
-        kelvin = tmp;
-        celsius = kelvin - 273.15;
-        fahrenheit = 9*celsius/5+32;
-        printf("%.2f C\n%.2f F ;-)\n", celsius, fahrenheit);
     }
-void universal(float tmp) /*undefined conversion*/
+    return data;
+}
+void push(double data) /*Stack input*/
+{
+    if(!isfull())
     {
-        float celsius, fahrenheit, kelvin;
-
-        printf("For Celsius:\n");
-        if (tmp > -273.16)
-        {
-            celsius = tmp;
-            fahrenheit = 9*celsius/5+32;
-            kelvin = celsius + 273.15;
-            printf("%.2f C\n%.2f F\n%.2f K ;-)\n", celsius, fahrenheit, kelvin);
-        }
-        else printf("Invalid value of temperature :-(\n");
-        printf("For Fahrenheit:\n");
-        if (tmp > -459.67)
-        {
-            fahrenheit = tmp;
-            celsius = (fahrenheit - 32)*5/9;
-            kelvin = celsius + 273.15;
-            printf("%.2f C\n%.2f F\n%.2f K ;-)\n", celsius, fahrenheit, kelvin);
-        }
-        else printf("Invalid value of temperature :-(\n");
-        printf("For Kelvin:\n");
-        if (tmp > -0.01)
-        {
-            kelvin = tmp;
-            celsius = kelvin - 273.15;
-            fahrenheit = 9*celsius/5+32;
-            printf("%.2f C\n%.2f F\n%.2f K ;-)\n", celsius, fahrenheit, kelvin);
-        }
-        else printf("Invalid value of temperature :-(\n");
+        top++;
+        stack[top] = data;
     }
-void error(char type, char tp2) /*Error handling*/
+    else
     {
-        switch(type)
-        {
-            case 'a':printf("Incompatible argument: '%c'. Try 'c', 'f' or 'k' instead :-(\n", tp2);
-            break;
-            case 'b':printf("Invalid value of temperature :-(\n");
-            break;
-        }
+        printf("Could not insert data, Stack is full.\n");
     }
+}
