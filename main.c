@@ -73,22 +73,21 @@ double peek() /*Stack top element value*/
 }
 double pop() /*Stack output*/
 {
-    double data;
+    double data=0.0f;
 
-    if(!isempty())
-    {
-        data = stack[top];
-        --top;
 
-    }
+    data = stack[top];
+    --top;
+
     return data;
 }
-void push(double data) /*Stack input*/
+void push(double data2) /*Stack input*/
 {
+
     if(!isfull())
     {
         top++;
-        stack[top] = data;
+        stack[top] = data2;
     }
     else
     {
